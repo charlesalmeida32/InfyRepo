@@ -2,9 +2,10 @@ import openpyxl
 from openpyxl.reader import excel
 import pandas as pd
 import sys
+from tkinter.filedialog import askopenfilename
 
 try:
-    excel_path = 'Excel_records.xlsx'
+    excel_path = askopenfilename()
     wb = openpyxl.load_workbook(excel_path)
 
     sheet_names = wb.sheetnames
