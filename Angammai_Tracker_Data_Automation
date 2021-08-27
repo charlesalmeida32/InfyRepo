@@ -1,0 +1,57 @@
+import openpyxl
+from openpyxl.reader import excel
+import pandas as pd
+import sys
+
+try:
+    excel_path = 'Excel_records.xlsx'
+    wb = openpyxl.load_workbook(excel_path)
+
+    sheet_names = wb.sheetnames
+    if 'Master' not in sheet_names:
+        wb.create_sheet('Master')
+        wb['Master']['A1'] = 'Start Date'
+        wb['Master']['A2'] = 'End Date'
+        wb['Master']['E1'] = 'Date Format: MM-DD-YYYY'
+        print('Please Fill the Master Sheet')
+        wb.save(excel_path)
+        sys.exit()
+    wb['Master'].delete_rows(3,10000)
+    
+    wb['Master']['A1'] = 'Start Date'
+    wb['Master']['A2'] = 'End Date'
+    wb['Master']['E1'] = 'Date Format: MM-DD-YYYY'
+    data_list = []
+    start_date = wb['Master']['B1'].value
+    end_date = wb['Master']['B2'].value       
+
+    for sheet in sheet_names:
+        
+        if sheet == 'Master':
+            continue
+
+        def date_converter(date):
+            return pd.to_datetime(date)
+
+        df = pd.read_excel('Excel_records.xlsx', sheet, converters={'DATE':date_converter})
+        df.set_index('DATE', inplace=True)
+        records = len(df.loc[start_date:end_date])
+        data_list.append([sheet,records])
+
+    master_sheet = wb['Master']
+
+    master_sheet['A4'] = 'Tech Name'
+    master_sheet['B4'] = 'Count'
+    counter = 5
+    for x in data_list:
+        master_sheet[f'A{counter}'] = x[0]
+        master_sheet[f'B{counter}'] = x[1]
+        counter += 1
+
+        
+
+        
+    wb.save(excel_path)
+    wb.close()
+except Exception as e:
+    print(e)
